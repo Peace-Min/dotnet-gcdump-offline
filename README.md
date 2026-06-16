@@ -5,6 +5,8 @@ Offline install bundle for the Microsoft `dotnet-gcdump` .NET diagnostic tool.
 ## Contents
 
 - `nupkg/dotnet-gcdump.9.0.661903.nupkg`
+- `Install.ps1`
+- `Create-GcdumpReport.ps1`
 - `scripts/install-offline.ps1`
 - `scripts/gcdump-report.ps1`
 
@@ -24,13 +26,13 @@ dotnet --info
 From this repository directory:
 
 ```powershell
-.\scripts\install-offline.ps1
+.\Install.ps1
 ```
 
 If PowerShell script execution is restricted:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-offline.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install.ps1
 ```
 
 Default install path:
@@ -42,25 +44,25 @@ C:\tools\dotnet-gcdump
 Custom path:
 
 ```powershell
-.\scripts\install-offline.ps1 -ToolPath D:\tools\dotnet-gcdump
+.\Install.ps1 -ToolPath D:\tools\dotnet-gcdump
 ```
 
 ## Generate a text report from a .gcdump file
 
 ```powershell
-.\scripts\gcdump-report.ps1 -GcdumpPath C:\dumps\sample.gcdump
+.\Create-GcdumpReport.ps1 -GcdumpPath C:\dumps\sample.gcdump
 ```
 
 If PowerShell script execution is restricted:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\gcdump-report.ps1 -GcdumpPath C:\dumps\sample.gcdump
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Create-GcdumpReport.ps1 -GcdumpPath C:\dumps\sample.gcdump
 ```
 
 Write the report to a file:
 
 ```powershell
-.\scripts\gcdump-report.ps1 -GcdumpPath C:\dumps\sample.gcdump -OutputPath C:\dumps\sample.heapstat.txt
+.\Create-GcdumpReport.ps1 -GcdumpPath C:\dumps\sample.gcdump -OutputPath C:\dumps\sample.heapstat.txt
 ```
 
 The report is plain text and is suitable for an LLM/agent to parse by `Size`, `Count`, and `Type`.
