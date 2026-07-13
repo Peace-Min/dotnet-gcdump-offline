@@ -24,6 +24,14 @@ ClrMdRootChainReport (managed root-chain from a heap `.dmp`):
 - `scripts/install-clrmd.ps1`
 - `scripts/rootchain-report.ps1`
 
+SparrowXlsExport (파수 Sparrow 정적분석 결과 `.xls` -> 항목별 `.md` 분리):
+
+- `sparrow-xlsexport/win-x64/` (framework-dependent build: exe + NPOI DLLs, ~24 MB; needs .NET 8 runtime)
+- `Install-SparrowXls.ps1`
+- `Create-SparrowItems.ps1`
+- `scripts/install-sparrowxls.ps1`
+- `scripts/sparrow-items.ps1`
+
 ## Requirements on the offline machine
 
 - .NET SDK 8.0 or later for `dotnet tool install`
@@ -130,6 +138,38 @@ Output: `reference-chains.{json,md,html}` in `-OutputDir`.
 C:\tools\ClrMdRootChainReport\ClrMdRootChainReport.exe C:\dumps\after.dmp --types LeakSample.DeviceViewModel --out C:\dumps\rootchain
 ```
 
+## SparrowXlsExport (Sparrow 정적분석 결과 분리)
+
+Reads a Sparrow (파수 정적분석) result `.xls` (real BIFF binary; `.xlsx` also accepted) **without
+Excel/COM** -- the file is read directly, so 문서중앙화(클라우디움) never engages -- and splits it into:
+
+- `items\<ID>_<체커키>_<파일명>_<라인>.md` -- one self-contained md per finding (field table + 체커 설명
+  + fenced 소스 코드), sized for a weak local LLM to process ONE item at a time.
+- `index.csv` -- md_file, ID, 체커 키, 위험도, 파일명, 라인, 이슈 상태, 체커명 (BOM, Excel-friendly).
+- `checkers.md` -- unique checker worklist (count, severity distribution, 설명) -- the backlog for
+  writing per-rule guidance docs.
+
+### Install offline
+
+```powershell
+.\Install-SparrowXls.ps1
+```
+
+Default install path `C:\tools\SparrowXlsExport`.
+
+### Split a result file
+
+```powershell
+.\Create-SparrowItems.ps1 -XlsPath C:\work\issues_OSTES_6827.xls -OutputDir C:\work\items
+# filters: -Severity 높음,매우위험   -Checker PRACTICE.   -Max 100
+```
+
+### Direct command
+
+```powershell
+C:\tools\SparrowXlsExport\SparrowXlsExport.exe C:\work\issues.xls --out C:\work\items --severity 높음
+```
+
 ## Package verification
 
 dotnet-gcdump package:
@@ -144,4 +184,11 @@ ClrMdRootChainReport (clrmd-rootchain/win-x64):
 ```text
 ClrMdRootChainReport.exe          SHA256: B90C6DFBC50E0B9F20040D64A5073B77A9A78874466C664A6B222FD785196115
 Microsoft.Diagnostics.Runtime.dll SHA256: 06F9910C8A37F8D4D758538E6DD307DE58BCFB3BB13E83658142C08087A25382
+```
+
+SparrowXlsExport (sparrow-xlsexport/win-x64):
+
+```text
+SparrowXlsExport.exe SHA256: 96248EA6A5DA9BAF69F3355929AA9A81F999E405DD59E63BA71C5F680B568C9F
+NPOI.Core.dll        SHA256: CF9867294397EFC61DA91A3CA5B06A3F6DB791B81D03D1C7B13601652A53F186
 ```
