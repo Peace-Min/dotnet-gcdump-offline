@@ -32,6 +32,11 @@ SparrowXlsExport (파수 Sparrow 정적분석 결과 `.xls` -> 항목별 `.md` �
 - `scripts/install-sparrowxls.ps1`
 - `scripts/sparrow-items.ps1`
 
+Sparrow Track A (스타일 벌크 결정론 자동수정 — LLM 없이, 텍스트만):
+
+- `sparrow-tracka/Run-TrackA.ps1` + `bucket1-autofix.editorconfig` + `track-a-autofix.md`
+  (설치 불필요; `dotnet format`는 SDK 내장. 대상 레포 fix 브랜치에서 러너 1회 호출)
+
 ## Requirements on the offline machine
 
 - .NET SDK 8.0 or later for `dotnet tool install`
@@ -169,6 +174,24 @@ Default install path `C:\tools\SparrowXlsExport`.
 ```powershell
 C:\tools\SparrowXlsExport\SparrowXlsExport.exe C:\work\issues.xls --out C:\work\items --severity 높음
 ```
+
+## Sparrow Track A — 스타일 벌크 자동수정 (LLM 없이)
+
+Sparrow 검출 중 스타일 계열(버킷1: var / 명확화 괄호 / 객체 이니셜라이저 = ~4,100건)은 Microsoft
+자체 툴체인(Roslyn + `.editorconfig`)으로 결정론 처리한다. **반입물은 텍스트뿐**(`sparrow-tracka/`),
+`dotnet format`은 SDK 내장이라 별도 설치 없음. 대상 프로젝트의 **fix 브랜치**에서:
+
+```powershell
+# .editorconfig 자동배치 -> var/괄호/이니셜라이저 순차 적용 -> 규칙군별 커밋
+.\sparrow-tracka\Run-TrackA.ps1 -Solution C:\Work\OSTES\OSTES.sln -Commit
+
+# 변경 없이 무엇이 바뀔지만
+.\sparrow-tracka\Run-TrackA.ps1 -Solution ...\OSTES.sln -DryRun
+```
+
+레거시(non-SDK) .csproj가 `dotnet format`으로 안 열리면 러너가 경고하고 **VS "코드 정리 / Fix All in
+Solution"** 으로 안내한다(같은 결과). 실행 후 **빌드 통과 + Sparrow 재분석으로 건수 감소 확인 필수**
+(Roslyn 경계 != Sparrow 경계). 자세한 절차·주의는 `sparrow-tracka/track-a-autofix.md`.
 
 ## Package verification
 
